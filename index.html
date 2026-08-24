@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorador de proyectos de ley — Prototipo v2</title>
+<style>
+:root{
+  --ink:#151515;
+  --muted:#6b7280;
+  --line:#dedede;
+  --soft:#f6f6f6;
+  --panel:#fff;
+  --accent:#11497d;
+
+  --ppso:#159fb1;
+  --fa:#ffe000;
+  --pusc:#1c744f;
+  --cac:#159a93;
+  --pln:#d82e32;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  color:var(--ink);
+  background:#fff;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.wrap{width:min(1180px,calc(100% - 32px));margin:0 auto}
+.topline{height:7px;background:var(--accent)}
+header{
+  padding:30px 0 0;
+  border-bottom:1px solid var(--line);
+}
+.kicker{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-weight:800;
+  color:var(--accent);
+  margin-bottom:9px;
+}
+h1{
+  margin:0;
+  font-size:clamp(30px,5vw,52px);
+  line-height:1.02;
+  letter-spacing:-.035em;
+}
+.deck{
+  max-width:780px;
+  margin:14px 0 10px;
+  font-size:17px;
+  line-height:1.45;
+  color:#444;
+}
+.cutoff{
+  font-size:13px;
+  color:var(--muted);
+  margin:10px 0 20px;
+}
+.demo{
+  display:inline-block;
+  background:#111;
+  color:#fff;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.06em;
+  padding:4px 7px;
+  margin-left:6px;
+}
+.main-tabs{
+  display:flex;
+  gap:28px;
+}
+.main-tab{
+  border:0;
+  background:transparent;
+  padding:14px 0 12px;
+  border-bottom:4px solid transparent;
+  color:#707070;
+  font-weight:800;
+}
+.main-tab.active{
+  color:var(--ink);
+  border-bottom-color:var(--accent);
+}
+.panel{display:none;padding:26px 0 64px}
+.panel.active{display:block}
+
+/* Filters */
+.filters{
+  display:grid;
+  grid-template-columns:1.5fr .8fr .9fr;
+  gap:12px;
+  margin-bottom:24px;
+}
+label{
+  display:block;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  font-weight:800;
+}
+input,select{
+  display:block;
+  width:100%;
+  margin-top:7px;
+  border:1px solid #cfcfcf;
+  border-radius:8px;
+  background:#fff;
+  color:var(--ink);
+  padding:12px 13px;
+}
+.reset-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:-8px 0 18px;
+  gap:12px;
+}
+.small{font-size:13px;color:var(--muted)}
+.link-btn{
+  border:0;
+  background:transparent;
+  color:var(--accent);
+  padding:3px 0;
+  font-weight:700;
+}
+
+/* Project list */
+.result-head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:20px;
+  border-bottom:2px solid var(--ink);
+  padding-bottom:8px;
+}
+.result-head h2{font-size:21px;margin:0}
+.project{
+  border-bottom:1px solid var(--line);
+  padding:18px 0;
+}
+.project-top{
+  display:grid;
+  grid-template-columns:110px 1fr auto;
+  gap:18px;
+  align-items:start;
+}
+.exp{
+  font-weight:900;
+  font-size:17px;
+}
+.party-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  font-size:12px;
+  font-weight:800;
+  margin-top:7px;
+}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.project h3{
+  font-size:19px;
+  line-height:1.25;
+  margin:0 0 8px;
+}
+.meta{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+.view-btn{
+  border:1px solid #bbb;
+  background:#fff;
+  border-radius:8px;
+  padding:9px 12px;
+  font-weight:700;
+}
+.view-btn:hover{background:var(--soft)}
+.detail{
+  display:none;
+  margin:16px 0 2px 128px;
+  border-left:4px solid var(--accent);
+  background:var(--soft);
+  padding:15px 16px;
+}
+.detail.open{display:block}
+.detail-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:15px;
+  margin-top:14px;
+}
+.detail-label{
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+  margin-bottom:4px;
+}
+.detail p{margin:0;line-height:1.5;font-size:14px}
+
+/* Statistics */
+.stats-top{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:22px;
+}
+.subtabs{
+  display:inline-flex;
+  border:1px solid #cfcfcf;
+  border-radius:9px;
+  overflow:hidden;
+}
+.subtab{
+  border:0;
+  background:#fff;
+  padding:10px 14px;
+  font-weight:800;
+  color:#666;
+}
+.subtab + .subtab{border-left:1px solid #cfcfcf}
+.subtab.active{
+  background:var(--accent);
+  color:#fff;
+}
+.stats-filter{
+  min-width:min(100%,320px);
+}
+.stats-filter label{font-size:11px}
+.stats-filter select{margin-top:5px}
+
+.hero-stat{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:28px;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:26px 0;
+  margin-bottom:30px;
+}
+.entity-kicker{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:700;
+}
+.entity-title{
+  margin:7px 0 22px;
+  font-size:28px;
+  line-height:1.08;
+}
+.number-row{
+  display:flex;
+  align-items:flex-end;
+  flex-wrap:wrap;
+  gap:28px;
+}
+.primary-number{
+  font-size:72px;
+  line-height:.86;
+  font-weight:900;
+  letter-spacing:-.05em;
+}
+.primary-label{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:8px;
+}
+.secondary-number{
+  font-size:38px;
+  font-weight:900;
+  line-height:1;
+}
+.callout{
+  background:var(--soft);
+  padding:18px;
+  align-self:stretch;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.callout strong{
+  display:block;
+  font-size:26px;
+  margin:3px 0 8px;
+}
+.callout p{
+  margin:0;
+  font-size:14px;
+  line-height:1.45;
+  color:#444;
+}
+.context-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:34px;
+}
+.section-title{
+  margin:0 0 5px;
+  font-size:20px;
+}
+.section-sub{
+  margin:0 0 17px;
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.4;
+}
+.rank-list{display:grid;gap:11px}
+.rank-row{
+  display:grid;
+  grid-template-columns:28px minmax(125px,210px) 1fr 52px;
+  gap:10px;
+  align-items:center;
+  font-size:13px;
+}
+.rank-pos{font-weight:800;color:var(--muted)}
+.rank-name{
+  font-weight:700;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.track{
+  height:12px;
+  background:#efefef;
+  overflow:hidden;
+}
+.fill{height:100%;min-width:2px}
+.rank-value{
+  text-align:right;
+  font-weight:900;
+}
+.selected-row{
+  outline:2px solid var(--accent);
+  outline-offset:4px;
+}
+.distribution{
+  margin-top:18px;
+}
+.stack{
+  display:flex;
+  height:25px;
+  width:100%;
+  overflow:hidden;
+  background:#eee;
+}
+.segment{height:100%;position:relative}
+.legend{
+  display:grid;
+  gap:9px;
+  margin-top:15px;
+}
+.legend-row{
+  display:grid;
+  grid-template-columns:12px 1fr auto;
+  gap:9px;
+  align-items:center;
+  font-size:13px;
+}
+.legend-swatch{width:12px;height:12px}
+.legend-row strong{font-size:14px}
+.jump-btn{
+  margin-top:20px;
+  border:1px solid var(--accent);
+  color:var(--accent);
+  background:#fff;
+  border-radius:8px;
+  padding:9px 12px;
+  font-weight:800;
+}
+.jump-btn:hover{background:#f3f7fa}
+.note{
+  margin-top:34px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+}
+
+@media(max-width:800px){
+  .filters{grid-template-columns:1fr}
+  .project-top{grid-template-columns:1fr}
+  .detail{margin-left:0}
+  .detail-grid{grid-template-columns:1fr}
+  .hero-stat{grid-template-columns:1fr}
+  .context-grid{grid-template-columns:1fr}
+  .rank-row{grid-template-columns:24px 120px 1fr 44px}
+  .primary-number{font-size:60px}
+}
+</style>
+</head>
+<body>
+<div class="topline"></div>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">Asamblea Legislativa 2026–2030</div>
+    <h1>Explorador de proyectos de ley</h1>
+    <p class="deck">
+      Consulte los proyectos presentados y compare qué partidos y diputaciones concentran
+      la mayor actividad legislativa.
+    </p>
+    <div class="cutoff">
+      Datos al corte de <strong>18 de agosto de 2026</strong>
+      <span class="demo">PROTOTIPO CON DATOS DEMO</span>
+    </div>
+
+    <nav class="main-tabs" aria-label="Vistas principales">
+      <button class="main-tab active" data-panel="projectsPanel">Consultar proyectos</button>
+      <button class="main-tab" data-panel="statsPanel">Estadísticas</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section id="projectsPanel" class="panel active">
+  <div class="wrap">
+    <div class="filters">
+      <label>
+        Buscar por texto
+        <input id="searchInput" type="search" placeholder="Expediente, título o diputación">
+      </label>
+
+      <label>
+        Partido
+        <select id="projectParty">
+          <option value="ALL">Todos los partidos</option>
+        </select>
+      </label>
+
+      <label>
+        Diputación
+        <select id="projectDeputy">
+          <option value="ALL">Todas las diputaciones</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="reset-row">
+      <div id="projectCount" class="small"></div>
+      <button id="resetFilters" class="link-btn" type="button">Limpiar filtros</button>
+    </div>
+
+    <div class="result-head">
+      <h2>Proyectos</h2>
+      <div class="small">Seleccione “Ver ficha” para ampliar</div>
+    </div>
+    <div id="projectList"></div>
+
+    <div class="note">
+      El expediente 25.580 se utiliza como ejemplo real. Los demás registros, nombres y conteos son
+      ficticios y sirven únicamente para probar la estructura del dashboard antes de conectarlo
+      con la base de datos definitiva.
+    </div>
+  </div>
+</section>
+
+<section id="statsPanel" class="panel">
+  <div class="wrap">
+
+    <div class="stats-top">
+      <div class="subtabs" aria-label="Tipo de estadística">
+        <button class="subtab active" data-stat="party">Por partido</button>
+        <button class="subtab" data-stat="deputy">Por diputación</button>
+      </div>
+
+      <div class="stats-filter">
+        <label id="statsSelectLabel">
+          Seleccionar partido
+          <select id="statsSelect"></select>
+        </label>
+      </div>
+    </div>
+
+    <div class="hero-stat">
+      <div>
+        <div id="entityKicker" class="entity-kicker"></div>
+        <h2 id="entityTitle" class="entity-title"></h2>
+
+        <div class="number-row">
+          <div>
+            <div id="entityProjects" class="primary-number">0</div>
+            <div class="primary-label">proyectos presentados</div>
+          </div>
+
+          <div>
+            <div id="entityShare" class="secondary-number">0%</div>
+            <div class="primary-label">del total registrado</div>
+          </div>
+        </div>
+
+        <button id="jumpToProjects" class="jump-btn" type="button">Ver sus proyectos</button>
+      </div>
+
+      <div class="callout">
+        <div class="detail-label">Posición frente a los demás</div>
+        <strong id="entityRank"></strong>
+        <p id="entityComparison"></p>
+      </div>
+    </div>
+
+    <div class="context-grid">
+      <section>
+        <h3 id="rankingTitle" class="section-title">Comparación</h3>
+        <p id="rankingSub" class="section-sub"></p>
+        <div id="rankingList" class="rank-list"></div>
+      </section>
+
+      <section>
+        <h3 id="distributionTitle" class="section-title">Distribución del total</h3>
+        <p id="distributionSub" class="section-sub"></p>
+        <div id="stackChart" class="distribution"></div>
+        <div id="distributionLegend" class="legend"></div>
+      </section>
+    </div>
+
+    <div class="note">
+      Las estadísticas están diseñadas para leerse siempre en contexto: cantidad absoluta,
+      porcentaje del total y posición frente a los demás partidos o diputaciones.
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+const parties = {
+  PPSO:{name:"Partido Pueblo Soberano",color:"#159fb1"},
+  FA:{name:"Frente Amplio",color:"#ffe000"},
+  PUSC:{name:"Partido Unidad Social Cristiana",color:"#1c744f"},
+  CAC:{name:"Coalición Agenda Ciudadana",color:"#159a93"},
+  PLN:{name:"Partido Liberación Nacional",color:"#d82e32"}
+};
+
+const deputies = [
+  {name:"Eder Francisco Hernández Ulloa",party:"PLN"},
+  {name:"Diputación demo 1",party:"PLN"},
+  {name:"Diputación demo 2",party:"PLN"},
+  {name:"Diputación demo 3",party:"PPSO"},
+  {name:"Diputación demo 4",party:"PPSO"},
+  {name:"Diputación demo 5",party:"PPSO"},
+  {name:"Diputación demo 6",party:"FA"},
+  {name:"Diputación demo 7",party:"FA"},
+  {name:"Diputación demo 8",party:"FA"},
+  {name:"Diputación demo 9",party:"PUSC"},
+  {name:"Diputación demo 10",party:"PUSC"},
+  {name:"Diputación demo 11",party:"PUSC"},
+  {name:"Diputación demo 12",party:"CAC"},
+  {name:"Diputación demo 13",party:"CAC"},
+  {name:"Diputación demo 14",party:"CAC"}
+];
+
+const projectRows = [
+  ["25.580","Ley para aliviar el bolsillo de los costarricenses ante aumentos en el precio de combustibles producto de crisis internacionales","PLN","Eder Francisco Hernández Ulloa","6 de mayo de 2026","Economía / combustibles","Propone mecanismos para atenuar el impacto de aumentos internacionales del precio de los combustibles y contempla una reducción temporal del impuesto único.","real"],
+  ["D-001","Proyecto demostrativo sobre crédito productivo","PLN","Eder Francisco Hernández Ulloa","14 de mayo de 2026","Economía","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-002","Proyecto demostrativo sobre infraestructura rural","PLN","Eder Francisco Hernández Ulloa","4 de junio de 2026","Infraestructura","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-003","Proyecto demostrativo sobre regulación municipal","PLN","Diputación demo 1","11 de junio de 2026","Gobierno local","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-004","Proyecto demostrativo sobre apoyo agrícola","PLN","Diputación demo 2","2 de julio de 2026","Agricultura","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+
+  ["D-005","Proyecto demostrativo sobre modernización institucional","PPSO","Diputación demo 3","12 de mayo de 2026","Estado","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-006","Proyecto demostrativo sobre simplificación de trámites","PPSO","Diputación demo 3","21 de mayo de 2026","Administración pública","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-007","Proyecto demostrativo sobre empleo juvenil","PPSO","Diputación demo 3","3 de junio de 2026","Empleo","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-008","Proyecto demostrativo sobre inversión pública","PPSO","Diputación demo 4","17 de junio de 2026","Economía","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-009","Proyecto demostrativo sobre seguridad ciudadana","PPSO","Diputación demo 4","1 de julio de 2026","Seguridad","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-010","Proyecto demostrativo sobre contratación pública","PPSO","Diputación demo 5","9 de julio de 2026","Estado","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-011","Proyecto demostrativo sobre infraestructura educativa","PPSO","Diputación demo 5","23 de julio de 2026","Educación","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+
+  ["D-012","Proyecto demostrativo sobre vivienda accesible","FA","Diputación demo 6","18 de mayo de 2026","Vivienda","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-013","Proyecto demostrativo sobre protección laboral","FA","Diputación demo 6","26 de mayo de 2026","Trabajo","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-014","Proyecto demostrativo sobre transporte público","FA","Diputación demo 7","16 de junio de 2026","Transporte","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-015","Proyecto demostrativo sobre áreas protegidas","FA","Diputación demo 7","30 de junio de 2026","Ambiente","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-016","Proyecto demostrativo sobre becas estudiantiles","FA","Diputación demo 8","15 de julio de 2026","Educación","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+
+  ["D-017","Proyecto demostrativo sobre seguridad social","PUSC","Diputación demo 9","7 de mayo de 2026","Salud","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-018","Proyecto demostrativo sobre turismo rural","PUSC","Diputación demo 9","28 de mayo de 2026","Turismo","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-019","Proyecto demostrativo sobre pequeñas empresas","PUSC","Diputación demo 10","10 de junio de 2026","Economía","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-020","Proyecto demostrativo sobre carreteras cantonales","PUSC","Diputación demo 11","8 de julio de 2026","Infraestructura","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+
+  ["D-021","Proyecto demostrativo sobre transparencia algorítmica","CAC","Diputación demo 12","20 de mayo de 2026","Tecnología","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-022","Proyecto demostrativo sobre datos abiertos","CAC","Diputación demo 12","5 de junio de 2026","Transparencia","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-023","Proyecto demostrativo sobre innovación pública","CAC","Diputación demo 13","24 de junio de 2026","Tecnología","Registro ficticio para probar filtros, fichas y estadísticas.","demo"],
+  ["D-024","Proyecto demostrativo sobre participación ciudadana","CAC","Diputación demo 14","20 de julio de 2026","Gobernanza","Registro ficticio para probar filtros, fichas y estadísticas.","demo"]
+];
+
+const projects = projectRows.map(r=>({
+  id:r[0],title:r[1],party:r[2],deputy:r[3],date:r[4],topic:r[5],summary:r[6],kind:r[7]
+}));
+
+const totalProjects = projects.length;
+let statsMode = "party";
+
+/* Helpers */
+const pct = n => totalProjects ? (n/totalProjects*100) : 0;
+const fmtPct = n => `${n.toFixed(1).replace(".0","")}%`;
+const countByParty = code => projects.filter(p=>p.party===code).length;
+const countByDeputy = name => projects.filter(p=>p.deputy===name).length;
+const deputyParty = name => deputies.find(d=>d.name===name)?.party || "";
+const colorForEntity = (mode,key) => mode==="party" ? parties[key].color : parties[deputyParty(key)]?.color || "#11497d";
+
+/* Populate project filters */
+const projectParty = document.getElementById("projectParty");
+Object.entries(parties).forEach(([code,p])=>{
+  projectParty.insertAdjacentHTML("beforeend",`<option value="${code}">${p.name}</option>`);
+});
+
+const projectDeputy = document.getElementById("projectDeputy");
+[...deputies].sort((a,b)=>a.name.localeCompare(b.name)).forEach(d=>{
+  projectDeputy.insertAdjacentHTML("beforeend",`<option value="${d.name}">${d.name}</option>`);
+});
+
+/* Project list */
+function renderProjects(){
+  const q = document.getElementById("searchInput").value.trim().toLowerCase();
+  const party = projectParty.value;
+  const deputy = projectDeputy.value;
+
+  const visible = projects.filter(p=>{
+    const hay = `${p.id} ${p.title} ${p.deputy} ${p.topic}`.toLowerCase();
+    return (!q || hay.includes(q))
+      && (party==="ALL" || p.party===party)
+      && (deputy==="ALL" || p.deputy===deputy);
+  });
+
+  document.getElementById("projectCount").textContent =
+    `${visible.length} de ${totalProjects} proyectos visibles`;
+
+  const box = document.getElementById("projectList");
+  if(!visible.length){
+    box.innerHTML = `<div style="padding:24px 0;color:#666;">No hay proyectos que coincidan con estos filtros.</div>`;
+    return;
+  }
+
+  box.innerHTML = visible.map((p,i)=>{
+    const party = parties[p.party];
+    const uid = `detail-${projects.indexOf(p)}`;
+    return `
+      <article class="project">
+        <div class="project-top">
+          <div>
+            <div class="exp">${p.id}</div>
+            <div class="party-badge">
+              <span class="dot" style="background:${party.color}"></span>${p.party}
+            </div>
+          </div>
+
+          <div>
+            <h3>${p.title}</h3>
+            <div class="meta">${p.deputy} · ${p.date} · ${p.topic}</div>
+          </div>
+
+          <button class="view-btn" type="button" data-detail="${uid}" aria-expanded="false">
+            Ver ficha
+          </button>
+        </div>
+
+        <div id="${uid}" class="detail">
+          <div class="detail-label">Resumen</div>
+          <p>${p.summary}</p>
+
+          <div class="detail-grid">
+            <div>
+              <div class="detail-label">Expediente</div>
+              <strong>${p.id}</strong>
+            </div>
+            <div>
+              <div class="detail-label">Partido</div>
+              <strong>${party.name}</strong>
+            </div>
+            <div>
+              <div class="detail-label">Proponente</div>
+              <strong>${p.deputy}</strong>
+            </div>
+            <div>
+              <div class="detail-label">Fecha</div>
+              <strong>${p.date}</strong>
+            </div>
+            <div>
+              <div class="detail-label">Tema</div>
+              <strong>${p.topic}</strong>
+            </div>
+            <div>
+              <div class="detail-label">Tipo de registro</div>
+              <strong>${p.kind==="real" ? "Ejemplo real" : "Dato demostrativo"}</strong>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  document.querySelectorAll(".view-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const target = document.getElementById(btn.dataset.detail);
+      const open = target.classList.toggle("open");
+      btn.textContent = open ? "Ocultar ficha" : "Ver ficha";
+      btn.setAttribute("aria-expanded",String(open));
+    });
+  });
+}
+
+document.getElementById("searchInput").addEventListener("input",renderProjects);
+projectParty.addEventListener("change",renderProjects);
+projectDeputy.addEventListener("change",renderProjects);
+
+document.getElementById("resetFilters").addEventListener("click",()=>{
+  document.getElementById("searchInput").value="";
+  projectParty.value="ALL";
+  projectDeputy.value="ALL";
+  renderProjects();
+});
+
+/* Main tabs */
+document.querySelectorAll(".main-tab").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".main-tab").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    document.getElementById(btn.dataset.panel).classList.add("active");
+  });
+});
+
+/* Statistics */
+const statsSelect = document.getElementById("statsSelect");
+
+function entitiesForMode(){
+  if(statsMode==="party"){
+    return Object.keys(parties).map(code=>({
+      key:code,
+      name:parties[code].name,
+      count:countByParty(code),
+      color:parties[code].color
+    }));
+  }
+  return deputies.map(d=>({
+    key:d.name,
+    name:d.name,
+    count:countByDeputy(d.name),
+    party:d.party,
+    color:parties[d.party].color
+  }));
+}
+
+function rebuildStatsSelect(preserve){
+  const entities = entitiesForMode();
+  statsSelect.innerHTML = entities.map(e=>{
+    const prefix = statsMode==="deputy" ? `${e.name} · ${e.party}` : e.name;
+    return `<option value="${e.key}">${prefix}</option>`;
+  }).join("");
+
+  if(preserve && entities.some(e=>e.key===preserve)){
+    statsSelect.value = preserve;
+  }else{
+    statsSelect.value = statsMode==="party" ? "PLN" : "Eder Francisco Hernández Ulloa";
+  }
+}
+
+function rankSentence(rank,total,count,mode){
+  const noun = mode==="party" ? "partidos" : "diputaciones";
+  if(rank===1) return `Ocupa el primer lugar entre ${total} ${noun} en esta base demostrativa.`;
+  return `Ocupa el puesto ${rank} de ${total} ${noun} según la cantidad de proyectos registrados.`;
+}
+
+function renderStats(){
+  const entities = entitiesForMode().sort((a,b)=>b.count-a.count || a.name.localeCompare(b.name));
+  const key = statsSelect.value;
+  const selected = entities.find(e=>e.key===key) || entities[0];
+  if(!selected) return;
+
+  const rank = entities.findIndex(e=>e.key===selected.key)+1;
+  const share = pct(selected.count);
+  const color = selected.color;
+
+  if(statsMode==="party"){
+    document.getElementById("entityKicker").innerHTML =
+      `<span class="dot" style="background:${color}"></span> Partido seleccionado`;
+    document.getElementById("entityTitle").textContent = selected.name;
+  }else{
+    document.getElementById("entityKicker").innerHTML =
+      `<span class="dot" style="background:${color}"></span> ${selected.party} · ${parties[selected.party].name}`;
+    document.getElementById("entityTitle").textContent = selected.name;
+  }
+
+  document.getElementById("entityProjects").textContent = selected.count;
+  document.getElementById("entityShare").textContent = fmtPct(share);
+  document.getElementById("entityRank").textContent = `#${rank} de ${entities.length}`;
+  document.getElementById("entityComparison").textContent =
+    rankSentence(rank,entities.length,selected.count,statsMode);
+
+  document.getElementById("rankingTitle").textContent =
+    statsMode==="party" ? "Cómo se compara con otros partidos" : "Cómo se compara con otras diputaciones";
+  document.getElementById("rankingSub").textContent =
+    "Cantidad de proyectos y porcentaje que representa cada uno sobre el total general.";
+
+  const max = Math.max(1,...entities.map(e=>e.count));
+  document.getElementById("rankingList").innerHTML = entities.map((e,i)=>`
+    <div class="rank-row ${e.key===selected.key ? "selected-row" : ""}">
+      <div class="rank-pos">${i+1}</div>
+      <div class="rank-name" title="${e.name}">${e.name}</div>
+      <div class="track"><div class="fill" style="width:${e.count/max*100}%;background:${e.color}"></div></div>
+      <div class="rank-value">${e.count}<div style="font-size:10px;color:#777;font-weight:700;">${fmtPct(pct(e.count))}</div></div>
+    </div>
+  `).join("");
+
+  document.getElementById("distributionTitle").textContent =
+    statsMode==="party" ? "Qué parte del total aporta cada partido" : "Distribución por diputación";
+  document.getElementById("distributionSub").textContent =
+    statsMode==="party"
+      ? "Cada segmento representa la proporción de proyectos registrada por cada partido."
+      : "Cada segmento representa la proporción de proyectos registrada por cada diputación.";
+
+  document.getElementById("stackChart").innerHTML =
+    `<div class="stack">${entities.map(e=>`
+      <div class="segment" title="${e.name}: ${e.count} (${fmtPct(pct(e.count))})"
+           style="width:${pct(e.count)}%;background:${e.color};opacity:${e.key===selected.key?1:.58}">
+      </div>`).join("")}</div>`;
+
+  document.getElementById("distributionLegend").innerHTML =
+    entities.slice(0,statsMode==="party" ? 5 : 8).map(e=>`
+      <div class="legend-row">
+        <span class="legend-swatch" style="background:${e.color};opacity:${e.key===selected.key?1:.65}"></span>
+        <span>${e.name}</span>
+        <strong>${fmtPct(pct(e.count))}</strong>
+      </div>
+    `).join("");
+
+  if(statsMode==="deputy"){
+    const partyTotal = countByParty(selected.party);
+    const within = partyTotal ? selected.count/partyTotal*100 : 0;
+    document.getElementById("entityComparison").textContent +=
+      ` Dentro de ${selected.party}, concentra ${fmtPct(within)} de los proyectos del partido.`;
+  }
+}
+
+document.querySelectorAll(".subtab").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".subtab").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    statsMode = btn.dataset.stat;
+
+    const labelText = statsMode==="party" ? "Seleccionar partido" : "Seleccionar diputación";
+    const label = document.getElementById("statsSelectLabel");
+    label.childNodes[0].nodeValue = labelText + "\n";
+
+    rebuildStatsSelect();
+    renderStats();
+  });
+});
+
+statsSelect.addEventListener("change",renderStats);
+
+document.getElementById("jumpToProjects").addEventListener("click",()=>{
+  const key = statsSelect.value;
+
+  document.querySelectorAll(".main-tab").forEach(b=>b.classList.remove("active"));
+  document.querySelector('[data-panel="projectsPanel"]').classList.add("active");
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.getElementById("projectsPanel").classList.add("active");
+
+  document.getElementById("searchInput").value="";
+  if(statsMode==="party"){
+    projectParty.value=key;
+    projectDeputy.value="ALL";
+  }else{
+    projectParty.value="ALL";
+    projectDeputy.value=key;
+  }
+  renderProjects();
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+rebuildStatsSelect();
+renderProjects();
+renderStats();
+</script>
+</body>
+</html>
